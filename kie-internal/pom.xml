@@ -3,19 +3,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <parent>
+  <!--parent>
     <groupId>org.kie</groupId>
     <artifactId>kie-api-parent</artifactId>
     <version>6.0.1.Final</version>
-  </parent>
+  </parent-->
 
+  <groupId>org.kie</groupId>
   <artifactId>kie-internal</artifactId>
-  <packaging>bundle</packaging><!-- bundle = jar + OSGi metadata -->
+  <version>6.0.1.Final.Bugfix</version>
+  <!--packaging>bundle</packaging--><!-- bundle = jar + OSGi metadata -->
 
   <name>KIE Internal</name>
   <description>The Drools and jBPM internal API which is NOT backwards compatible between releases.</description>
-  
-  <build>
+ 
+  <!--build>
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -44,35 +46,41 @@
         </configuration>
       </plugin>
     </plugins>
-  </build>
+  </build-->
 
   <dependencies>
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kie-api</artifactId>
+      <version>6.0.1.Final</version>
     </dependency>
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
+      <version>1.4.3</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <version>1.7.2</version>
     </dependency>
     <dependency>
       <groupId>javax.enterprise</groupId>
       <artifactId>cdi-api</artifactId>
+      <version>1.0-SP4</version>
       <scope>provided</scope><!-- HACK for OSGi: should be <optional>true</optional> instead -->
     </dependency>
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
       <artifactId>jaxb-xjc</artifactId>
+      <version>2.2.5</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
       <artifactId>jaxb-impl</artifactId>
+      <version>2.2.5</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
