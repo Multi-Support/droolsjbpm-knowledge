@@ -28,7 +28,9 @@ import org.kie.api.task.model.OrganizationalEntity;
 import org.kie.api.task.model.Task;
 import org.kie.api.task.model.TaskSummary;
 import org.kie.api.task.model.User;
+import org.kie.internal.task.api.model.ContentData;
 import org.kie.internal.task.api.model.Deadline;
+import org.kie.internal.task.api.model.FaultData;
 
 public interface TaskPersistenceContext {
 
@@ -98,6 +100,13 @@ public interface TaskPersistenceContext {
 
     Deadline removeDeadline(Deadline deadline);
 
+    Task setDocumentToTask(Content content, ContentData contentData, Task task);
+    
+    Task setFaultToTask(Content content, FaultData faultData, Task task);
+    
+    Task setOutputToTask(Content content, ContentData contentData, Task task);
+    
+    
     /*
      * Query related methods
      */
