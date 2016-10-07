@@ -137,6 +137,8 @@ public interface TaskPersistenceContext {
     <T> T queryAndLockStringWithParametersInTransaction(String queryName, Map<String, Object> params, boolean singleResult, Class<T> clazz);
 
     int executeUpdateString(String updateString);
+    
+    int executeUpdate(String queryName, Map<String, Object> params);
 
     HashMap<String, Object> addParametersToMap(Object ... parameterValues);
 
