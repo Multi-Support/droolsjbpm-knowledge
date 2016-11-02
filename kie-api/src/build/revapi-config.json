@@ -293,7 +293,28 @@
        "old": "method java.util.List<java.lang.String> org.kie.api.task.UserGroupCallback::getGroupsForUser(java.lang.String, java.util.List<java.lang.String>, java.util.List<java.lang.String>)",
        "new": "method java.util.List<java.lang.String> org.kie.api.task.UserGroupCallback::getGroupsForUser(java.lang.String)",
        "justification": "Removed unused and confusing arguments"
-     }
+      },
+      {
+       "code": "java.method.addedToInterface",
+       "new": "method java.lang.String org.kie.api.task.model.Task::getFormName()",
+       "justification": "Moved from InternalTask to tidy up interfaces"
+      },
+      {
+       "code": "java.method.returnTypeChanged",
+       "old": "method int org.kie.api.task.model.Task::getPriority()",
+       "new": "method java.lang.Integer org.kie.api.task.model.Task::getPriority()",
+       "justification": "Changed so that Task and TaskSummary interfaces match, and we can implement them with the same type if desired"
+      },
+      {
+       "code": "java.method.addedToInterface",
+       "new": "method java.lang.Integer org.kie.api.task.model.Task::getVersion()",
+       "justification": "Changed from int to Integer to make all types alligned (either primitives everywhere, or wrappers)"
+      },
+      {
+       "code": "java.method.addedToInterface",
+       "new": "method java.lang.Boolean org.kie.api.task.model.Task::isArchived()",
+       "justification": "Moved from InternalTask to tidy up interfaces"
+      }
     ]
   }
 }
