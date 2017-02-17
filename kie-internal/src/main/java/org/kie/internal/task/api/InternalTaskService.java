@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.kie.api.task.TaskService;
 import org.kie.api.task.model.Attachment;
-import org.kie.api.task.model.Comment;
 import org.kie.api.task.model.Content;
 import org.kie.api.task.model.Group;
 import org.kie.api.task.model.I18NText;
@@ -54,10 +53,6 @@ public interface InternalTaskService extends TaskService {
     void addUser(User user);
 
     int archiveTasks(List<TaskSummary> tasks);
-
-    void claim(long taskId, String userId, List<String> groupIds);
-
-    void claimNextAvailable(String userId, List<String> groupIds);
 
     void deleteFault(long taskId, String userId);
 

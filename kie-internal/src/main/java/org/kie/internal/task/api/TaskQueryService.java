@@ -25,7 +25,6 @@ import org.kie.api.task.model.Status;
 import org.kie.api.task.model.Task;
 import org.kie.api.task.model.TaskSummary;
 import org.kie.internal.query.QueryFilter;
-import org.kie.internal.query.data.QueryData;
 
 
 /**
@@ -107,19 +106,6 @@ public interface TaskQueryService {
 
     int getCompletedTaskByUserId(String userId);
     int getPendingTaskByUserId(String userId);
-
-    /**
-     * This method will no longer be available as of jBPM 7.x
-     *
-     * @param parameters A map of parameters to add to the query
-     * @param union Whether the query should return a union or intersection of the criteria (parameters)
-     *
-     * @see {@link #query(String, QueryData)}
-     * @return
-     */
-    @Deprecated
-    List<TaskSummary> getTasksByVariousFields( String userId, Map<String, List<?>> parameters, boolean union);
-
 
     /**
      *

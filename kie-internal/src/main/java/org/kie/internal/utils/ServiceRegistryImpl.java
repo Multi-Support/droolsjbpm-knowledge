@@ -17,10 +17,18 @@
 
 package org.kie.internal.utils;
 
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.kie.api.KieServices;
 import org.kie.api.Service;
 import org.kie.api.builder.KieScannerFactoryService;
 import org.kie.api.concurrent.KieExecutors;
+import org.kie.api.io.KieResources;
 import org.kie.api.marshalling.KieMarshallers;
 import org.kie.api.persistence.jpa.KieStoreServices;
 import org.kie.internal.assembler.KieAssemblers;
@@ -34,13 +42,6 @@ import org.kie.internal.weaver.KieWeavers;
 import org.kie.internal.weaver.KieWeaversImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This is an internal class, not for public consumption.
@@ -182,11 +183,9 @@ public class ServiceRegistryImpl
         addDefault( "org.kie.internal.KnowledgeBaseFactoryService",
                     "org.drools.core.impl.KnowledgeBaseFactoryServiceImpl" );
 
-        addDefault( "org.kie.internal.io.ResourceFactoryService",
+        addDefault( KieResources.class,
                     "org.drools.core.io.impl.ResourceFactoryServiceImpl" );
 
-        addDefault(  "org.kie.internal.SystemEventListenerService",
-                     "org.drools.core.impl.SystemEventListenerServiceImpl" );
         addDefault(  KieMarshallers.class,
                      "org.drools.core.marshalling.impl.MarshallerProviderImpl");
         addDefault(  KieExecutors.class,

@@ -16,9 +16,6 @@
 
 package org.kie.internal.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Externalizable;
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +30,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Priority
@@ -359,23 +359,30 @@ public class ChainedProperties
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             CacheKey other = (CacheKey) obj;
             if (classLoader == null) {
-                if (other.classLoader != null)
+                if (other.classLoader != null) {
                     return false;
-            } else if (!classLoader.equals(other.classLoader))
+                }
+            } else if (!classLoader.equals(other.classLoader)) {
                 return false;
+            }
             if (confFileName == null) {
-                if (other.confFileName != null)
+                if (other.confFileName != null) {
                     return false;
-            } else if (!confFileName.equals(other.confFileName))
+                }
+            } else if (!confFileName.equals(other.confFileName)) {
                 return false;
+            }
             return true;
         }
 
