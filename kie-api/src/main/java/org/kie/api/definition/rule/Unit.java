@@ -1,11 +1,11 @@
 /*
- * Copyright 2005 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package org.kie.api.event.kiebase;
+package org.kie.api.definition.rule;
 
-import org.kie.api.definition.KiePackage;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface AfterKiePackageRemovedEvent
-    extends
-    KieBaseEvent {
-    public KiePackage getKiePackage();
+import org.kie.api.runtime.rule.RuleUnit;
+
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Unit {
+    Class<? extends RuleUnit> value();
 }
