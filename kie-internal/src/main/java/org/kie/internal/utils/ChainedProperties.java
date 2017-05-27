@@ -26,7 +26,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -38,11 +37,7 @@ import org.slf4j.LoggerFactory;
  * Priority
  * <ul>
  *  <li>System properties</li>
- *  <li>home directory</li>
- *  <li>working directory</li>
- *  <li>META-INF/ of optionally provided classLoader</li>
- *  <li>META-INF/ of Thread.currentThread().getContextClassLoader()</li>
- *  <li>META-INF/ of  ClassLoader.getSystemClassLoader()</li>
+ *  <li>META-INF/ of provided classLoader</li>
  * </ul>
  * <br/>
  * To improve performance in frequent session creation cases, chained properties can be cached by it's conf file name
@@ -53,115 +48,43 @@ import org.slf4j.LoggerFactory;
  */
 public class ChainedProperties
     implements
-    Externalizable {
+    Externalizable, Cloneable {
 
     protected static transient Logger logger = LoggerFactory.getLogger(ChainedProperties.class);
-    private static final int MAX_CACHE_ENTRIES = Integer.parseInt(System.getProperty("org.kie.property.cache.size", "100"));
-    private static final boolean CACHE_ENABLED = Boolean.parseBoolean(System.getProperty("org.kie.property.cache.enabled", "false"));
 
-    protected static Map<CacheKey, List<Properties>> propertiesCache =
-            Collections.synchronizedMap(
-                    new LinkedHashMap<CacheKey, List<Properties>>() {
-        private static final long serialVersionUID = -4728876927433598466L;
+    private List<Properties> props = new ArrayList<Properties>();
+    private List<Properties> defaultProps = new ArrayList<Properties>();
 
-        protected boolean removeEldestEntry(
-                Map.Entry<CacheKey, List<Properties>> eldest) {
-            return size() > MAX_CACHE_ENTRIES;
-        }
-    });
+    public ChainedProperties() { }
 
-    private List<Properties> props;
-    private List<Properties> defaultProps;
-
-    public ChainedProperties() {
+    public static ChainedProperties getChainedProperties( ClassLoader classLoader ) {
+        return getChainedProperties( "properties.conf", classLoader );
     }
 
-    public ChainedProperties(String confFileName, ClassLoader classLoader) {
-        this(confFileName, classLoader, true);
+    public static ChainedProperties getChainedProperties( String confFileName, ClassLoader classLoader ) {
+        return new ChainedProperties( confFileName, classLoader );
     }
 
-    public ChainedProperties(String confFileName, ClassLoader classLoader,
-            boolean populateDefaults) {
+    public ChainedProperties clone() {
+        ChainedProperties clone = new ChainedProperties();
+        clone.props.addAll( this.props );
+        clone.defaultProps.addAll( this.defaultProps );
+        return clone;
+    }
 
-        this.props = new ArrayList<Properties>();
-        this.defaultProps = new ArrayList<Properties>();
-
-        // Properties added in precedence order
-
-        // System defined properties always get precedence
+    private ChainedProperties(String confFileName, ClassLoader classLoader) {
         addProperties( System.getProperties() );
 
-        // System property defined properties file
-        loadProperties( System.getProperty( "drools." + confFileName ),
-                        this.props );
-
-        // User home properties file
-        loadProperties( System.getProperty( "user.home" ) + "/drools."
-                + confFileName, this.props );
-
-        // Working directory properties file
-        loadProperties( "drools." + confFileName, this.props );
-
-        // check META-INF directories for all known ClassLoaders
-
-        // DROOLS-1443 load properties from supplied classLoader
-        loadProperties( "META-INF/drools." + confFileName, classLoader,
-                this.props );
-
-        // DROOLS-1443 load properties from supplied classLoader
-        loadProperties( "/META-INF/drools." + confFileName, classLoader,
-                this.props );
-
-        ClassLoader contextClassLoader = Thread.currentThread()
-                .getContextClassLoader();
-        if ( contextClassLoader != null && contextClassLoader != classLoader ) {
-            // DROOLS-1443 load properties from context classLoader
-            loadProperties(confFileName, contextClassLoader, this.props);
-        }
-
-        ClassLoader systemClassLoader = null;
-        try {
-            systemClassLoader = ClassLoader.getSystemClassLoader();
-        } catch (SecurityException se) {
-            // DROOLS-1125: the system class loader cannot be retrieved in
-            // Google App Engine - ignore
-        }
-        if ( systemClassLoader != null && systemClassLoader != classLoader ) {
-            // DROOLS-1443 load properties from system classLoader
-            loadProperties(confFileName, systemClassLoader, this.props);
-        }
-
-        if ( !populateDefaults ) {
-            return;
-        }
-
-        // load defaults
-        // DROOLS-1443 load default properties from supplied classLoader
-        loadProperties( "META-INF/drools.default." + confFileName, classLoader,
-                this.defaultProps);
-        // DROOLS-1443 load default properties from supplied classLoader
-        loadProperties( "/META-INF/drools.default." + confFileName, classLoader,
-                this.defaultProps);
-
-        if ( contextClassLoader != null && contextClassLoader != classLoader ) {
-            // DROOLS-1443 load default properties from context classLoader
-            loadProperties(confFileName, contextClassLoader, this.defaultProps);
-        }
-        if ( systemClassLoader != null && systemClassLoader != classLoader ) {
-            // DROOLS-1443 load default properties from system classLoader
-            loadProperties(confFileName, systemClassLoader, this.defaultProps);
-        }
+        loadProperties( "META-INF/kie." + confFileName, classLoader, this.props );
+        loadProperties( "META-INF/kie.default." + confFileName, classLoader, this.defaultProps);
 
         // this happens only in OSGi: for some reason doing
         // ClassLoader.getResources() doesn't work but doing
         // Class.getResourse() does
         if (this.defaultProps.isEmpty()) {
             try {
-                Class<?> c = Class.forName(
-                        "org.drools.compiler.lang.MVELDumper", false,
-                        classLoader);
-                URL confURL = c.getResource("/META-INF/drools.default."
-                        + confFileName);
+                Class<?> c = Class.forName( "org.drools.core.WorkingMemory", false, classLoader);
+                URL confURL = c.getResource("/META-INF/kie.default." + confFileName);
                 loadProperties(confURL, this.defaultProps);
             } catch (ClassNotFoundException e) { }
         }
@@ -181,7 +104,6 @@ public class ChainedProperties
 
     /**
      * Specifically added properties take priority, so they go to the front of the list.
-     * @param properties
      */
     public void addProperties(Properties properties) {
         this.props.add( 0, properties );
@@ -248,35 +170,11 @@ public class ChainedProperties
     }
 
     private void loadProperties(String fileName,
-                                List<Properties> chain) {
-        if (fileName != null) {
-            File file = new File(fileName);
-            if (file != null && file.exists()) {
-                loadProperties(fileName, null, chain);
-            }
-        }
-    }
-
-    private void loadProperties(String fileName,
                                 ClassLoader classLoader,
                                 List<Properties> chain) {
-        if (!CACHE_ENABLED) {
-            try {
-                chain.addAll(read(fileName,classLoader));
-            } catch (IOException e){}
-            return;
-        }
-        CacheKey ck = new CacheKey(fileName, classLoader);
-        List<Properties> cached = propertiesCache.get(ck);
-        if (cached == null) {
-            try {
-                cached = read(fileName, classLoader);
-                propertiesCache.put(ck, cached);
-            } catch (IOException e) {}
-        }
-        if (cached != null) {
-            chain.addAll(cached);
-        }
+        try {
+            chain.addAll(read(fileName,classLoader));
+        } catch (IOException e){}
     }
 
     private List<Properties> read(String fileName, ClassLoader classLoader)
@@ -310,68 +208,5 @@ public class ChainedProperties
         } catch ( IOException e ) {
             //throw new IllegalArgumentException( "Invalid URL to properties file '" + confURL.toExternalForm() + "'" );
         }
-    }
-
-
-    /*
-     * optional cache handling to improve performance to avoid duplicated loads of properties
-     */
-
-
-    private static class CacheKey {
-        private String confFileName;
-        private ClassLoader classLoader;
-
-        CacheKey(String confFileName, ClassLoader classLoader) {
-            this.confFileName = confFileName;
-            this.classLoader = classLoader;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result
-                    + ((classLoader == null) ? 0 : classLoader.hashCode());
-            result = prime * result
-                    + ((confFileName == null) ? 0 : confFileName.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            CacheKey other = (CacheKey) obj;
-            if (classLoader == null) {
-                if (other.classLoader != null) {
-                    return false;
-                }
-            } else if (!classLoader.equals(other.classLoader)) {
-                return false;
-            }
-            if (confFileName == null) {
-                if (other.confFileName != null) {
-                    return false;
-                }
-            } else if (!confFileName.equals(other.confFileName)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "CacheKey [confFileName=" + confFileName + ", classLoader="
-                    + classLoader + "]";
-        }
-
     }
 }

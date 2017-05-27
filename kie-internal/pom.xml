@@ -10,6 +10,7 @@
   </parent>
 
   <artifactId>kie-internal</artifactId>
+  <version>7.0.0.Test</version>
   <packaging>bundle</packaging><!-- bundle = jar + OSGi metadata -->
 
   <name>KIE :: Internal</name>
